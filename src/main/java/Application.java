@@ -7,17 +7,15 @@ import java.util.List;
 
 public class Application {
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
-        DataReader dataReader = new DataReader("iris.data");
+        DataReader dataReader = new DataReader("iris.data", "iris.names");
 
-        List<List<String>> dataSet = dataReader.readFromFile();
-        Data data = new Data(dataSet);
+        Data data = dataReader.readData();
 
         Data.Crosvalidator crosvalidator = data.createCrosvalidator(10, 1);
         crosvalidator.getTestData();
         crosvalidator.getTrainingData();
         System.out.println("");
     }
-
 }

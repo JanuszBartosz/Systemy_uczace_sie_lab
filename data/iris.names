@@ -1,1 +1,4 @@
-sepal_length,sepal_width,petal_length,petal_width;Iris_Setosa,Iris_Versicolour,Iris_Virginica
+sepal_length,sepal_width,petal_length,petal_width,class
+real,real,real,real,enum
+Iris_Setosa,Iris_Versicolour,Iris_Virginica
+
