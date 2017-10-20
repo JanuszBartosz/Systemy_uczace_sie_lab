@@ -4,11 +4,8 @@ import cern.colt.matrix.ObjectFactory2D;
 import cern.colt.matrix.ObjectMatrix1D;
 import cern.colt.matrix.ObjectMatrix2D;
 import main.java.data.discretizatorImpl.DiscretizatorFactory;
-import main.java.data.discretizatorImpl.EqualFrequencyDiscretizator;
-import main.java.data.discretizatorImpl.EqualWidthDiscretizator;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class Data {
@@ -30,6 +27,10 @@ public class Data {
 
     public ObjectMatrix2D getDataSet() {
         return dataSet;
+    }
+
+    public List<String> getClassNames() {
+        return classNames;
     }
 
     public Crosvalidator createCrosvalidator(int numberChunks, int foldNumber) {
@@ -60,31 +61,30 @@ public class Data {
 
     public class Crosvalidator {
 
-        private List<List<String>> crosvalidationDataSet;
-
-        private ObjectMatrix2D[] trainingData;
+        private ObjectMatrix2D trainingData;
 
         private ObjectMatrix2D testData;
 
         Crosvalidator(int numberChunks, int foldNumber) {
 
-            //this.crosvalidationDataSet = new LinkedList<>(dataSet);
-            int chunkSize = crosvalidationDataSet.size() / numberChunks;
+            int chunkSize = dataSet.rows() / numberChunks;
             int trainingDataSize = (numberChunks - 1) * chunkSize;
-            int testDataSize = crosvalidationDataSet.size() - trainingDataSize;
+            int testDataSize = dataSet.rows() - trainingDataSize;
+            int testDataBeginIndex = foldNumber * testDataSize;
+            this.testData = dataSet.viewPart(testDataBeginIndex, 0, testDataSize, dataSet.columns());
 
-            this.testData = dataSet.viewPart(foldNumber * testDataSize, 0,testDataSize, dataSet.columns());
-            this.testData = new LinkedList<>(testDataSublist);
-            testDataSublist.clear();
-            this.trainingData = crosvalidationDataSet;
+            ObjectMatrix2D[]  trainingDataChunks = new ObjectMatrix2D[2];
+            trainingDataChunks[0] = dataSet.viewPart(0, 0, testDataBeginIndex, dataSet.columns());
+            trainingDataChunks[1] = dataSet.viewPart(testDataBeginIndex + testDataSize, 0 , dataSet.rows() - (testDataBeginIndex + testDataSize), dataSet.columns());
+            this.trainingData = ObjectFactory2D.dense.appendRows(trainingDataChunks[0], trainingDataChunks[1]);
         }
 
-        public List<List<String>> getTrainingData() {
-            return trainingData;
+        public ObjectMatrix2D getTrainingData() {
+            return this.trainingData;
         }
 
-        public List<List<String>> getTestData() {
-            return testData;
+        public ObjectMatrix2D getTestData() {
+            return this.testData;
         }
     }
 }

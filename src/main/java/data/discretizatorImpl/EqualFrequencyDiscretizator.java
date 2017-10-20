@@ -4,6 +4,7 @@ import cern.colt.function.ObjectFunction;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class EqualFrequencyDiscretizator implements ObjectFunction {
     List<Pair<Double, Double>> bins;
 
     public EqualFrequencyDiscretizator(double numberBins, Object[] attributes) {
+        this.bins = new ArrayList<>();
         this.numberBins = numberBins;
 
         this.largerBinSize = (int) Math.ceil(attributes.length / numberBins);
