@@ -17,7 +17,9 @@ public class Data {
     private Crosvalidator crosvalidator;
 
     public Data(List<List<String>> dataSet, List<String> attributeNames, List<String> attributeTypes, List<String> classNames) {
-        String[][] dataSet2DArray = dataSet.stream().map(List::toArray).toArray(String[][]::new);
+        String[][] dataSet2DArray = dataSet.stream()
+                .map(List::toArray)
+                .toArray(String[][]::new);
         this.dataSet = ObjectFactory2D.dense.make(dataSet2DArray);
         this.attributeNames = attributeNames;
         this.attributeTypes = attributeTypes;
@@ -55,7 +57,7 @@ public class Data {
 
 
     public Crosvalidator getCrosvalidator() {
-        return crosvalidator;
+        return this.crosvalidator;
     }
 
 

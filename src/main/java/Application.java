@@ -5,6 +5,7 @@ import main.java.data.DataReader;
 import main.java.model.NaiveBayes;
 
 import java.util.List;
+import java.util.Map;
 
 public class Application {
 
@@ -14,8 +15,8 @@ public class Application {
 
         Data data = dataReader.readData();
 
-        Data.Crosvalidator crosvalidator = data.createCrosvalidator(10, 1);
-        NaiveBayes naiveBayes = new NaiveBayes(crosvalidator.getTrainingData(), crosvalidator.getTestData());
+        NaiveBayes naiveBayes = new NaiveBayes(data);
+        Map<String, Double> score = naiveBayes.doScoring();
         System.out.println("");
     }
 }
