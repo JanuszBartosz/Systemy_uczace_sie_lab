@@ -2,6 +2,7 @@ package main.java.model;
 
 import cern.colt.matrix.ObjectMatrix1D;
 import cern.colt.matrix.ObjectMatrix2D;
+import main.java.Params;
 import main.java.data.Data;
 
 import java.util.*;
@@ -16,14 +17,14 @@ public class NaiveBayes {
     private List<Map<String, Map<String, Double>>> chances; // Columns <Attribute <Class, Probability>>
     private Map<String, Map<String, Double>> confusionTable;
 
-    ObjectMatrix2D trainingData;
-    ObjectMatrix2D testData;
-    Data data;
+    private final ObjectMatrix2D trainingData;
+    private final ObjectMatrix2D testData;
+    private final Data data;
 
 
-    public NaiveBayes(Data data) {
+    public NaiveBayes(Data data, int foldNumber) {
         this.data = data;
-        Data.Crosvalidator crosvalidator = data.createCrosvalidator(10, 0);
+        Data.Crosvalidator crosvalidator = data.createCrosvalidator(Params.numberFolds, foldNumber);
         this.trainingData = crosvalidator.getTrainingData();
         this.testData = crosvalidator.getTestData();
         computeProbAPriori();
@@ -49,7 +50,7 @@ public class NaiveBayes {
         }
 
         return scores.stream().flatMap(m -> m.entrySet().stream())
-                .filter(e -> e.getValue() != Double.NaN)
+                //.filter(e -> e.getValue() != Double.NaN)
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(Map.Entry::getValue)));
     }
 
@@ -73,29 +74,29 @@ public class NaiveBayes {
             confusionMatrix.get(predicted).compute(real, (k, v) -> v + 1.0d);
         }
 
-        Map<String, Map<String, Double>> confusionTable = makeEmptyConfusionTable();
+        Map<String, Map<String, Double>> emptyConfusionTable = makeEmptyConfusionTable();
         for (String className : data.getClassNames()) {
-            Map<String, Double> classMap = confusionTable.get(className);
+            Map<String, Double> classMap = emptyConfusionTable.get(className);
             classMap.compute("TP", (k, v) -> v + confusionMatrix.get(className).get(className));
             classMap.compute("FP", (k, v) -> v + confusionMatrix.get(className)
                     .entrySet().stream()
                     .filter(e -> !e.getKey().equals(className))
                     .map(Map.Entry::getValue)
-                    .reduce(Double::sum).get());
+                    .reduce(Double::sum).orElse(0.0d));
             classMap.compute("FN", (k, v) -> v + confusionMatrix.entrySet().stream()
                     .filter(e -> !e.getKey().equals(className))
                     .map(Map.Entry::getValue)
                     .map(m -> m.get(className))
-                    .reduce(Double::sum).get());
+                    .reduce(Double::sum).orElse(0.0d));
             classMap.compute("TN", (k, v) -> v + confusionMatrix.entrySet().stream()
                     .filter(e -> !e.getKey().equals(className))
                     .map(Map.Entry::getValue)
                     .flatMap(m -> m.entrySet().stream())
                     .filter(e -> !e.getKey().equals(className))
                     .map(Map.Entry::getValue)
-                    .reduce(Double::sum).get());
+                    .reduce(Double::sum).orElse(0.0d));
         }
-        this.confusionTable = confusionTable;
+        this.confusionTable = emptyConfusionTable;
     }
 
     private void computeProbAPriori() {
@@ -133,7 +134,7 @@ public class NaiveBayes {
             }
 
             for (Map<String, Double> occurrencesPerClass : allOccurrences.get(colIdx).values()) {
-                Double sum = occurrencesPerClass.values().stream().reduce(Double::sum).get();
+                Double sum = occurrencesPerClass.values().stream().reduce(Double::sum).orElse(0.0d);
                 for (Map.Entry<String, Double> entry : occurrencesPerClass.entrySet()) {
                     occurrencesPerClass.compute(entry.getKey(), (k, v) -> v / sum);
                 }

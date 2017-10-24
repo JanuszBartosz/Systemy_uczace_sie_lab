@@ -3,9 +3,10 @@ package main.java.data;
 import cern.colt.matrix.ObjectFactory2D;
 import cern.colt.matrix.ObjectMatrix1D;
 import cern.colt.matrix.ObjectMatrix2D;
-import main.java.data.discretizatorImpl.DiscretizatorFactory;
+import main.java.data.discretizator.impl.DiscretizatorFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Data {
@@ -17,6 +18,7 @@ public class Data {
     private Crosvalidator crosvalidator;
 
     public Data(List<List<String>> dataSet, List<String> attributeNames, List<String> attributeTypes, List<String> classNames) {
+        Collections.shuffle(dataSet);
         String[][] dataSet2DArray = dataSet.stream()
                 .map(List::toArray)
                 .toArray(String[][]::new);
@@ -35,8 +37,8 @@ public class Data {
         return classNames;
     }
 
-    public Crosvalidator createCrosvalidator(int numberChunks, int foldNumber) {
-        this.crosvalidator = new Crosvalidator(numberChunks, foldNumber);
+    public Crosvalidator createCrosvalidator(int numberFolds, int foldNumber) {
+        this.crosvalidator = new Crosvalidator(numberFolds, foldNumber);
         return this.crosvalidator;
     }
 
@@ -75,9 +77,9 @@ public class Data {
             int testDataBeginIndex = foldNumber * testDataSize;
             this.testData = dataSet.viewPart(testDataBeginIndex, 0, testDataSize, dataSet.columns());
 
-            ObjectMatrix2D[]  trainingDataChunks = new ObjectMatrix2D[2];
+            ObjectMatrix2D[] trainingDataChunks = new ObjectMatrix2D[2];
             trainingDataChunks[0] = dataSet.viewPart(0, 0, testDataBeginIndex, dataSet.columns());
-            trainingDataChunks[1] = dataSet.viewPart(testDataBeginIndex + testDataSize, 0 , dataSet.rows() - (testDataBeginIndex + testDataSize), dataSet.columns());
+            trainingDataChunks[1] = dataSet.viewPart(testDataBeginIndex + testDataSize, 0, dataSet.rows() - (testDataBeginIndex + testDataSize), dataSet.columns());
             this.trainingData = ObjectFactory2D.dense.appendRows(trainingDataChunks[0], trainingDataChunks[1]);
         }
 

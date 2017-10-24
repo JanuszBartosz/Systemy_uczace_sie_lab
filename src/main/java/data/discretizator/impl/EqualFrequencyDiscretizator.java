@@ -1,4 +1,4 @@
-package main.java.data.discretizatorImpl;
+package main.java.data.discretizator.impl;
 
 import cern.colt.function.ObjectFunction;
 import org.apache.commons.lang3.tuple.ImmutablePair;

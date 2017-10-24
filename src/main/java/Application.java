@@ -2,10 +2,13 @@ package main.java;
 
 import main.java.data.Data;
 import main.java.data.DataReader;
+import main.java.model.Models;
 import main.java.model.NaiveBayes;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Application {
 
@@ -15,8 +18,9 @@ public class Application {
 
         Data data = dataReader.readData();
 
-        NaiveBayes naiveBayes = new NaiveBayes(data);
-        Map<String, Double> score = naiveBayes.doScoring();
-        System.out.println("");
+        Models models = new Models();
+        Map<String, Double> finalScore = models.runBayes(data);
+        System.out.println(finalScore);
     }
 }
+
