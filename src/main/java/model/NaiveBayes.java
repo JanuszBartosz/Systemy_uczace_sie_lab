@@ -105,12 +105,12 @@ public class NaiveBayes {
 
         Map<String, Double> occurrences = new HashMap<>();
 
+        for (String className : data.getClassNames()) {
+            occurrences.put(className, 1.0);
+        }
+
         for (int i = 0; i < classColumn.size(); i++) {
-            if (occurrences.containsKey(classColumn.get(i))) {
-                occurrences.replace(classColumn.get(i).toString(), occurrences.get(classColumn.get(i)) + 1);
-            } else {
-                occurrences.put(classColumn.get(i).toString(), 1.0);
-            }
+            occurrences.replace(classColumn.get(i).toString(), occurrences.get(classColumn.get(i)) + 1);
         }
 
         this.probAPriori = occurrences.entrySet().stream()

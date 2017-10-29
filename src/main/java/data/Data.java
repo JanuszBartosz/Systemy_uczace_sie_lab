@@ -42,7 +42,7 @@ public class Data {
         return this.crosvalidator;
     }
 
-    public void discretize() {
+    private void discretize() {
 
         List<Integer> realColumns = new ArrayList<>();
 
@@ -74,7 +74,7 @@ public class Data {
             int chunkSize = dataSet.rows() / numberChunks;
             int trainingDataSize = (numberChunks - 1) * chunkSize;
             int testDataSize = dataSet.rows() - trainingDataSize;
-            int testDataBeginIndex = foldNumber * testDataSize;
+            int testDataBeginIndex = foldNumber * chunkSize;
             this.testData = dataSet.viewPart(testDataBeginIndex, 0, testDataSize, dataSet.columns());
 
             ObjectMatrix2D[] trainingDataChunks = new ObjectMatrix2D[2];

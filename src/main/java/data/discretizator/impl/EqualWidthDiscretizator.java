@@ -1,31 +1,42 @@
 package main.java.data.discretizator.impl;
 
 import cern.colt.function.ObjectFunction;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
+import java.util.List;
 
 public class EqualWidthDiscretizator implements ObjectFunction {
 
-    private double numberBins;
-    private double divisor;
-    private double offset;
+    private List<Pair<Double, Double>> bins;
 
-
-    public EqualWidthDiscretizator(double numberBins, Object[] attributes) {
-        this.numberBins = numberBins;
+    EqualWidthDiscretizator(double numberBins, Object[] attributes) {
         DoubleSummaryStatistics stats = Arrays.stream(attributes)
-                .map(Object::toString)
+                .map(a -> (String) a)
                 .mapToDouble(Double::parseDouble)
                 .summaryStatistics();
 
-        offset = stats.getMin();
-        //TODO: Check if this correction by 0.5 is OK.
-        divisor = (stats.getMax() - offset) / numberBins + 0.5d;
+        double binSize = (stats.getMax() - stats.getMin()) / numberBins;
+        bins = new ArrayList<>();
+        for (int i = 0; i < numberBins; i++) {
+            bins.add(new ImmutablePair<>(stats.getMin() + binSize * i, i == numberBins - 1 ? stats.getMax() : stats.getMin() + binSize * i + binSize));
+        }
+
+        assert (bins.get(bins.size() - 1).getRight() == stats.getMax());
     }
 
     @Override
     public Object apply(Object argument) {
-        return String.valueOf((int) (Double.parseDouble(argument.toString()) - offset) / divisor);
+        double attribute = Double.parseDouble((String) argument);
+
+        for (int i = 0; i < bins.size(); i++) {
+            if (attribute >= bins.get(i).getLeft() && attribute <= bins.get(i).getRight()) {
+                return String.valueOf(i);
+            }
+        }
+        return "DISCRETIZATION_ERROR";
     }
 }

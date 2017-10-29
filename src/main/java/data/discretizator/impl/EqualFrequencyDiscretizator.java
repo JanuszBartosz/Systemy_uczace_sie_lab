@@ -10,19 +10,14 @@ import java.util.List;
 
 public class EqualFrequencyDiscretizator implements ObjectFunction {
 
-    private double numberBins;
-    private int largerBinSize;
-    private int smallerBinSize;
-    private int numberLargerBins;
-    List<Pair<Double, Double>> bins;
+    private List<Pair<Double, Double>> bins;
 
-    public EqualFrequencyDiscretizator(double numberBins, Object[] attributes) {
+    EqualFrequencyDiscretizator(double numberBins, Object[] attributes) {
         this.bins = new ArrayList<>();
-        this.numberBins = numberBins;
 
-        this.largerBinSize = (int) Math.ceil(attributes.length / numberBins);
-        this.smallerBinSize = (int) Math.floor(attributes.length / numberBins);
-        this.numberLargerBins = (int) (attributes.length % numberBins == 0 ? numberBins : attributes.length % numberBins);
+        int largerBinSize = (int) Math.ceil(attributes.length / numberBins);
+        int smallerBinSize = (int) Math.floor(attributes.length / numberBins);
+        int numberLargerBins = (int) (attributes.length % numberBins == 0 ? numberBins : attributes.length % numberBins);
         double[] doubleAttributes = Arrays.stream(attributes)
                 .map(Object::toString)
                 .mapToDouble(Double::parseDouble)
@@ -45,7 +40,7 @@ public class EqualFrequencyDiscretizator implements ObjectFunction {
 
     @Override
     public Object apply(Object argument) {
-        double attribute = Double.parseDouble(argument.toString());
+        double attribute = Double.parseDouble((String)argument);
 
         for (int i = 0; i < bins.size(); i++) {
             if (attribute >= bins.get(i).getLeft() && attribute <= bins.get(i).getRight()) {
