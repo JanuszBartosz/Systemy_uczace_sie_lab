@@ -1,0 +1,4 @@
+Alcohol,Malic_acid,Ash,Alcalinity_of_ash,Magnesium,Total_phenols,Flavanoids,Nonflavanoid_phenols,Proanthocyanins,Color_intensity,Hue,OD280/OD31_of_diluted_wines,Proline,class
+real,real,real,real,real,real,real,real,real,real,real,real,real
+1,2,3
+ 
