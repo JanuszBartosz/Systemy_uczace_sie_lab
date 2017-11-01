@@ -2,6 +2,7 @@ package main.java;
 
 import main.java.data.Data;
 import main.java.data.DataReader;
+import main.java.model.InductiveLearningAlgorithm;
 import main.java.model.Models;
 import main.java.model.NaiveBayes;
 
@@ -18,9 +19,12 @@ public class Application {
 
         Data data = dataReader.readData();
 
-        Models models = new Models();
-        Map<String, Double> finalScore = models.runBayes(data);
-        System.out.println(finalScore);
+        InductiveLearningAlgorithm ila = new InductiveLearningAlgorithm(data, 1);
+
+
+//        Models models = new Models();
+//        Map<String, Double> finalScore = models.runBayes(data);
+//        System.out.println(finalScore);
     }
 }
 
