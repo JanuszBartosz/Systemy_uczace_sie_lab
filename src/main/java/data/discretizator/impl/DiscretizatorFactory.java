@@ -1,13 +1,14 @@
 package main.java.data.discretizator.impl;
 
-import cern.colt.function.ObjectFunction;
 import main.java.Params;
+
+import java.util.function.Function;
 
 public class DiscretizatorFactory {
 
     private DiscretizatorFactory(){}
 
-    public static ObjectFunction getDiscretizator(Object[] attributes) {
+    public static Function<String, String> getDiscretizator(String[] attributes) {
 
         switch (Params.type) {
             case WIDTH:

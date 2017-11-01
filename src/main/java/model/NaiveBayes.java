@@ -17,8 +17,8 @@ public class NaiveBayes {
     private List<Map<String, Map<String, Double>>> chances; // Columns <Attribute <Class, Probability>>
     private Map<String, Map<String, Double>> confusionTable;
 
-    private final ObjectMatrix2D trainingData;
-    private final ObjectMatrix2D testData;
+    private final String[][] trainingData;
+    private final String[][] testData;
     private final Data data;
 
 
@@ -57,11 +57,11 @@ public class NaiveBayes {
     private void run() {
         Map<String, Map<String, Double>> confusionMatrix = makeEmptyConfusionMatrix(); //Predicted <Real, Count>
 
-        for (int rowIdx = 0; rowIdx < testData.rows(); rowIdx++) {
+        for (int rowIdx = 0; rowIdx < testData.length; rowIdx++) {
             Map<String, Double> probability = makeEmptyClassMap(0.0d);
 
-            for (int colIdx = 0; colIdx < testData.columns() - 1; colIdx++) {
-                String attr = (String) testData.get(rowIdx, colIdx);
+            for (int colIdx = 0; colIdx < testData[0].length - 1; colIdx++) {
+                String attr = testData[rowIdx][colIdx];
                 Map<String, Double> chance = chances.get(colIdx).get(attr);
 
                 for (Map.Entry<String, Double> entry : chance.entrySet()) {
@@ -70,7 +70,7 @@ public class NaiveBayes {
             }
 
             String predicted = Collections.max(probability.entrySet(), Map.Entry.comparingByValue()).getKey();
-            String real = (String) testData.get(rowIdx, testData.columns() - 1);
+            String real = testData[rowIdx][testData[0].length - 1];
             confusionMatrix.get(predicted).compute(real, (k, v) -> v + 1.0d);
         }
 
@@ -101,7 +101,7 @@ public class NaiveBayes {
 
     private void computeProbAPriori() {
 
-        ObjectMatrix1D classColumn = trainingData.viewColumn(trainingData.columns() - 1);
+        String[] classColumn = Arrays.stream(trainingData).map(a->a[a.length-1]).toArray(String[]::new);
 
         Map<String, Double> occurrences = new HashMap<>();
 
@@ -109,24 +109,24 @@ public class NaiveBayes {
             occurrences.put(className, 1.0);
         }
 
-        for (int i = 0; i < classColumn.size(); i++) {
-            occurrences.replace(classColumn.get(i).toString(), occurrences.get(classColumn.get(i)) + 1);
+        for (String className : classColumn) {
+            occurrences.replace(className, occurrences.get(className) + 1);
         }
 
         this.probAPriori = occurrences.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() / classColumn.size()));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() / classColumn.length));
     }
 
     private void computeChances() {
 
         List<Map<String, Map<String, Double>>> allOccurrences = makeEmptyOccurrencesMap();
 
-        for (int colIdx = 0; colIdx < trainingData.columns() - 1; colIdx++) {
+        for (int colIdx = 0; colIdx < trainingData[0].length - 1; colIdx++) {
 
-            for (int rowIdx = 0; rowIdx < trainingData.rows(); rowIdx++) {
+            for (int rowIdx = 0; rowIdx < trainingData.length; rowIdx++) {
 
-                String attr = trainingData.get(rowIdx, colIdx).toString();
-                String attrClass = trainingData.get(rowIdx, trainingData.columns() - 1).toString();
+                String attr = trainingData[rowIdx][colIdx];
+                String attrClass = trainingData[rowIdx][trainingData[0].length - 1];
                 allOccurrences.get(colIdx).get(attr)
                         .compute(attrClass,
                                 (k, v) -> v + 1.0d
@@ -146,11 +146,11 @@ public class NaiveBayes {
     private List<Map<String, Map<String, Double>>> makeEmptyOccurrencesMap() {
         List<Map<String, Map<String, Double>>> allOccurrences = new ArrayList<>();
 
-        for (int col = 0; col < data.getDataSet().columns() - 1; col++) {
+        for (int col = 0; col < data.getDataSet()[0].length - 1; col++) {
             allOccurrences.add(new HashMap<>());
 
-            for (int row = 0; row < data.getDataSet().rows(); row++) {
-                allOccurrences.get(col).putIfAbsent(data.getDataSet().get(row, col).toString(), makeEmptyClassMap(1.0d));
+            for (int row = 0; row < data.getDataSet().length; row++) {
+                allOccurrences.get(col).putIfAbsent(data.getDataSet()[row][col], makeEmptyClassMap(1.0d));
             }
         }
         return allOccurrences;

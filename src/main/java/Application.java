@@ -19,12 +19,12 @@ public class Application {
 
         Data data = dataReader.readData();
 
-        InductiveLearningAlgorithm ila = new InductiveLearningAlgorithm(data, 1);
+        //InductiveLearningAlgorithm ila = new InductiveLearningAlgorithm(data, 1);
 
 
-//        Models models = new Models();
-//        Map<String, Double> finalScore = models.runBayes(data);
-//        System.out.println(finalScore);
+        Models models = new Models();
+        Map<String, Double> finalScore = models.runBayes(data);
+        System.out.println(finalScore);
     }
 }
 

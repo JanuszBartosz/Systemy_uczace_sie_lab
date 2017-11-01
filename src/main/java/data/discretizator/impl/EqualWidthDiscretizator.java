@@ -1,6 +1,5 @@
 package main.java.data.discretizator.impl;
 
-import cern.colt.function.ObjectFunction;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -8,8 +7,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
+import java.util.function.Function;
 
-public class EqualWidthDiscretizator implements ObjectFunction {
+public class EqualWidthDiscretizator implements Function<String, String> {
 
     private List<Pair<Double, Double>> bins;
 
@@ -29,8 +29,8 @@ public class EqualWidthDiscretizator implements ObjectFunction {
     }
 
     @Override
-    public Object apply(Object argument) {
-        double attribute = Double.parseDouble((String) argument);
+    public String apply(String argument) {
+        double attribute = Double.parseDouble(argument);
 
         for (int i = 0; i < bins.size(); i++) {
             if (attribute >= bins.get(i).getLeft() && attribute <= bins.get(i).getRight()) {

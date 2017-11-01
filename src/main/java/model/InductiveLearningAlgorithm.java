@@ -17,8 +17,8 @@ public class InductiveLearningAlgorithm {
     public InductiveLearningAlgorithm(Data data, int foldNumber) {
         this.data = data;
         Data.Crosvalidator crosvalidator = data.createCrosvalidator(Params.numberFolds, foldNumber);
-        this.trainingData = crosvalidator.getTrainingData().toArray();
-        this.testData = (String[][]) crosvalidator.getTestData().toArray();
+        this.trainingData = crosvalidator.getTrainingData();
+        this.testData = crosvalidator.getTestData();
         partitionTrainingData();
     }
 

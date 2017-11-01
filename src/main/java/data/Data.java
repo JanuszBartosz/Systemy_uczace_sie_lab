@@ -1,17 +1,18 @@
 package main.java.data;
 
-import cern.colt.matrix.ObjectFactory2D;
 import cern.colt.matrix.ObjectMatrix1D;
-import cern.colt.matrix.ObjectMatrix2D;
 import main.java.data.discretizator.impl.DiscretizatorFactory;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class Data {
 
-    private final ObjectMatrix2D dataSet;
+    private String[][] dataSet;
     private final List<String> attributeNames;
     private final List<String> attributeTypes;
     private final List<String> classNames;
@@ -19,17 +20,16 @@ public class Data {
 
     public Data(List<List<String>> dataSet, List<String> attributeNames, List<String> attributeTypes, List<String> classNames) {
         Collections.shuffle(dataSet);
-        String[][] dataSet2DArray = dataSet.stream()
+        this.dataSet = dataSet.stream()
                 .map(List::toArray)
                 .toArray(String[][]::new);
-        this.dataSet = ObjectFactory2D.dense.make(dataSet2DArray);
         this.attributeNames = attributeNames;
         this.attributeTypes = attributeTypes;
         this.classNames = classNames;
         discretize();
     }
 
-    public ObjectMatrix2D getDataSet() {
+    public String[][] getDataSet() {
         return dataSet;
     }
 
@@ -44,17 +44,33 @@ public class Data {
 
     private void discretize() {
 
-        List<Integer> realColumns = new ArrayList<>();
+        List<Integer> realIdx = new ArrayList<>();
 
         for (int i = 0; i < attributeTypes.size(); i++) {
             if (attributeTypes.get(i).equals("real"))
-                realColumns.add(i);
+                realIdx.add(i);
         }
 
-        for (Integer column : realColumns) {
-            ObjectMatrix1D columnView = dataSet.viewColumn(column);
-            columnView.assign(DiscretizatorFactory.getDiscretizator(columnView.toArray()));
+        String [][] transposedDataSet = transpose(this.dataSet);
+
+        for (Integer idx : realIdx) {
+
+            transposedDataSet[idx] = Arrays.stream(transposedDataSet[idx]).map(DiscretizatorFactory.getDiscretizator(transposedDataSet[idx])).toArray(String[]::new);
         }
+
+        this.dataSet = transpose(transposedDataSet);
+    }
+
+    private String[][] transpose(String[][] matrix) {
+
+        String[][] transposedMatrix = new String[matrix[0].length][matrix.length];
+
+        for (int row = 0; row < transposedMatrix.length; row++) {
+            for (int col = 0; col < transposedMatrix[0].length; col++) {
+                transposedMatrix[row][col] = matrix[col][row];
+            }
+        }
+        return transposedMatrix;
     }
 
 
@@ -65,29 +81,28 @@ public class Data {
 
     public class Crosvalidator {
 
-        private ObjectMatrix2D trainingData;
+        private String[][] trainingData;
 
-        private ObjectMatrix2D testData;
+        private String[][] testData;
 
         Crosvalidator(int numberChunks, int foldNumber) {
 
-            int chunkSize = dataSet.rows() / numberChunks;
+            int chunkSize = dataSet.length / numberChunks;
             int trainingDataSize = (numberChunks - 1) * chunkSize;
-            int testDataSize = dataSet.rows() - trainingDataSize;
+            int testDataSize = dataSet.length - trainingDataSize;
             int testDataBeginIndex = foldNumber * chunkSize;
-            this.testData = dataSet.viewPart(testDataBeginIndex, 0, testDataSize, dataSet.columns());
+            this.testData = Arrays.copyOfRange(dataSet, testDataBeginIndex, testDataBeginIndex + testDataSize);
 
-            ObjectMatrix2D[] trainingDataChunks = new ObjectMatrix2D[2];
-            trainingDataChunks[0] = dataSet.viewPart(0, 0, testDataBeginIndex, dataSet.columns());
-            trainingDataChunks[1] = dataSet.viewPart(testDataBeginIndex + testDataSize, 0, dataSet.rows() - (testDataBeginIndex + testDataSize), dataSet.columns());
-            this.trainingData = ObjectFactory2D.dense.appendRows(trainingDataChunks[0], trainingDataChunks[1]);
+            String[][] firstChunk = Arrays.copyOfRange(dataSet, 0, testDataBeginIndex);
+            String[][] secondChunk = Arrays.copyOfRange(dataSet, testDataBeginIndex + testDataSize, dataSet.length);
+            this.trainingData = ArrayUtils.addAll(firstChunk, secondChunk);
         }
 
-        public ObjectMatrix2D getTrainingData() {
+        public String[][] getTrainingData() {
             return this.trainingData;
         }
 
-        public ObjectMatrix2D getTestData() {
+        public String[][] getTestData() {
             return this.testData;
         }
     }
