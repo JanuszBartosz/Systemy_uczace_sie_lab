@@ -15,16 +15,16 @@ public class Application {
 
     public static void main(String[] args) {
 
-        DataReader dataReader = new DataReader("wine.data", "wine.names");
+        DataReader dataReader = new DataReader("iris.data", "iris.names");
 
         Data data = dataReader.readData();
 
-        //InductiveLearningAlgorithm ila = new InductiveLearningAlgorithm(data, 1);
+        InductiveLearningAlgorithm ila = new InductiveLearningAlgorithm(data, 1);
 
 
-        Models models = new Models();
-        Map<String, Double> finalScore = models.runBayes(data);
-        System.out.println(finalScore);
+//        Models models = new Models();
+//        Map<String, Double> finalScore = models.runBayes(data);
+//        System.out.println(finalScore);
     }
 }
 

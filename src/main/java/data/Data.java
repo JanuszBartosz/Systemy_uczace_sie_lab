@@ -37,6 +37,10 @@ public class Data {
         return classNames;
     }
 
+    public List<String> getAttributeNames() {
+        return attributeNames;
+    }
+
     public Crosvalidator createCrosvalidator(int numberFolds, int foldNumber) {
         this.crosvalidator = new Crosvalidator(numberFolds, foldNumber);
         return this.crosvalidator;
