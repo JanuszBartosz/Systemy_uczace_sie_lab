@@ -1,6 +1,5 @@
 package main.java.data;
 
-import cern.colt.matrix.ObjectMatrix1D;
 import main.java.data.discretizator.impl.DiscretizatorFactory;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -8,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class Data {
 

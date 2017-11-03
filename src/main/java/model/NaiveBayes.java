@@ -1,7 +1,5 @@
 package main.java.model;
 
-import cern.colt.matrix.ObjectMatrix1D;
-import cern.colt.matrix.ObjectMatrix2D;
 import main.java.Params;
 import main.java.data.Data;
 
