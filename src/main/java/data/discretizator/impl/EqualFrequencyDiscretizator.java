@@ -12,14 +12,13 @@ public class EqualFrequencyDiscretizator implements Function<String, String> {
 
     private List<Pair<Double, Double>> bins;
 
-    EqualFrequencyDiscretizator(double numberBins, Object[] attributes) {
+    EqualFrequencyDiscretizator(double numberBins, String[] attributes) {
         this.bins = new ArrayList<>();
 
         int largerBinSize = (int) Math.ceil(attributes.length / numberBins);
         int smallerBinSize = (int) Math.floor(attributes.length / numberBins);
         int numberLargerBins = (int) (attributes.length % numberBins == 0 ? numberBins : attributes.length % numberBins);
         double[] doubleAttributes = Arrays.stream(attributes)
-                .map(Object::toString)
                 .mapToDouble(Double::parseDouble)
                 .sorted()
                 .toArray();

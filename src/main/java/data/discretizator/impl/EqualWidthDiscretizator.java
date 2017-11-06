@@ -13,9 +13,8 @@ public class EqualWidthDiscretizator implements Function<String, String> {
 
     private List<Pair<Double, Double>> bins;
 
-    EqualWidthDiscretizator(double numberBins, Object[] attributes) {
+    EqualWidthDiscretizator(double numberBins, String[] attributes) {
         DoubleSummaryStatistics stats = Arrays.stream(attributes)
-                .map(a -> (String) a)
                 .mapToDouble(Double::parseDouble)
                 .summaryStatistics();
 

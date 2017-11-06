@@ -18,9 +18,9 @@ public class DataReader {
     private Path namesFilePath;
     private Path directoryPath = Paths.get("data");
 
-    public DataReader(String dataFilePath, String namesFilePath) {
-        this.dataFilePath = directoryPath.resolve(dataFilePath);
-        this.namesFilePath = directoryPath.resolve(namesFilePath);
+    public DataReader(String filePath) {
+        this.dataFilePath = directoryPath.resolve(filePath + ".data");
+        this.namesFilePath = directoryPath.resolve(filePath + ".names");
     }
 
     public Data readData() {
@@ -28,14 +28,13 @@ public class DataReader {
         List<List<String>> dataNames = readDataNames();
 
         return new Data(dataSet, dataNames.get(0), dataNames.get(1), dataNames.get(2));
-
     }
 
     private List<List<String>> readDataset() {
 
         try (Stream<String> lines = Files.lines(dataFilePath)) {
 
-           return lines
+            return lines
                     .filter(l -> !l.isEmpty())
                     .map(l -> Arrays.asList(l.split(",")))
                     .collect(Collectors.toCollection(LinkedList::new));
