@@ -3,18 +3,18 @@ package main.java.data;
 import main.java.data.discretizator.impl.DiscretizatorFactory;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Data {
 
     private String[][] dataSet;
+    private String[][] transposedDataSet;
     private final List<String> attributeNames;
     private final List<String> attributeTypes;
     private final List<String> classNames;
     private Crosvalidator crosvalidator;
+    public final String mostCommonClass;
 
     public Data(List<List<String>> dataSet, List<String> attributeNames, List<String> attributeTypes, List<String> classNames) {
         Collections.shuffle(dataSet);
@@ -25,6 +25,13 @@ public class Data {
         this.attributeTypes = attributeTypes;
         this.classNames = classNames;
         discretize();
+        this.transposedDataSet = transpose(this.dataSet);
+        this.mostCommonClass = Arrays.stream(transposedDataSet[transposedDataSet.length - 1])
+                .collect(Collectors.groupingBy(p -> p, Collectors.counting()))
+                .entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue()).get()
+                .getKey();
     }
 
     public String[][] getDataSet() {
@@ -53,7 +60,7 @@ public class Data {
                 realIdx.add(i);
         }
 
-        String [][] transposedDataSet = transpose(this.dataSet);
+        String[][] transposedDataSet = transpose(this.dataSet);
 
         for (Integer idx : realIdx) {
 

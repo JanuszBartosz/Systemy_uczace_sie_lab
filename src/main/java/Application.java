@@ -20,7 +20,7 @@ public class Application {
 
     public static void main(String[] args) throws IOException {
 
-        List<String> datasetFilenames = Arrays.asList("wine");
+        List<String> datasetFilenames = Arrays.asList("wine", "ecoli", "vertebral");
 
         //InductiveLearningAlgorithm ila = new InductiveLearningAlgorithm(new DataReader("ecoli").readData(), 1);
 
@@ -37,10 +37,10 @@ public class Application {
                 Params.numberBins = numberBins;
                 Params.type = DiscretizatorType.WIDTH;
                 data = new DataReader(filename).readData();
-                allScores.add(models.runBayes(data));
+                allScores.add(models.runIla(data));
                 Params.type = DiscretizatorType.FREQUENCY;
                 data = new DataReader(filename).readData();
-                allScores.add(models.runBayes(data));
+                allScores.add(models.runIla(data));
             }
 
             List<String> lines = new ArrayList<>();

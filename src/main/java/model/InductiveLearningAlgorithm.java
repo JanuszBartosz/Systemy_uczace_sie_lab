@@ -35,6 +35,7 @@ public class InductiveLearningAlgorithm {
             this.attributeNamesMap.put(attributeNames.get(i), i);
         }
         extractRules();
+        run();
     }
 
     public Map<String, Double> doScoring() {
@@ -69,17 +70,17 @@ public class InductiveLearningAlgorithm {
     private void run() {
         Map<String, Map<String, Double>> confusionMatrix = makeEmptyConfusionMatrix(); //Predicted <Real, Count>
 
-        for (int rowIdx = 0; rowIdx < testData.length; rowIdx++) {
+        for (String[] row : testData) {
 
             String predicted = "";
-            for (int colIdx = 0; colIdx < testData[0].length - 1; colIdx++) {
-                String attr = testData[rowIdx][colIdx];
 
-                //predicted =
-
+            for (Pair<List<Pair<String, String>>, String> rule : rules) {
+                predicted = matchesRule(row, rule);
             }
 
-            String real = testData[rowIdx][testData[0].length - 1];
+            predicted = predicted == null ? data.mostCommonClass : predicted;
+
+            String real = row[testData[0].length - 1];
             confusionMatrix.get(predicted).compute(real, (k, v) -> v + 1.0d);
         }
 
@@ -108,9 +109,16 @@ public class InductiveLearningAlgorithm {
         this.confusionTable = emptyConfusionTable;
     }
 
-    private String matchesRule(String[] row, Pair<List<Pair<String, String>>, String> rule){
+    private String matchesRule(String[] row, Pair<List<Pair<String, String>>, String> rule) {
 
-        return null;
+        boolean match = true;
+        for (Pair<String, String> attribute : rule.getLeft()) {
+            if (!attribute.getRight().equals(row[attributeNamesMap.get(attribute.getLeft())])) {
+                match = false;
+            }
+        }
+
+        return match ? rule.getRight() : null;
     }
 
     private void extractRules() {
@@ -120,7 +128,7 @@ public class InductiveLearningAlgorithm {
             processSubTable(new LinkedList<>(currentSubtable), otherSubtables);
         }
 
-        rules.sort(Comparator.comparing(r->r.getLeft().size()));
+        rules.sort(Comparator.comparing(r -> r.getLeft().size()));
     }
 
     private void processSubTable(List<String[]> currentSubtable, List<List<String[]>> otherSubtables) {
@@ -278,6 +286,4 @@ public class InductiveLearningAlgorithm {
         }
         return confusionMatrix;
     }
-
-
 }

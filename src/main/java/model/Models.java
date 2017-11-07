@@ -21,4 +21,16 @@ public class Models {
                 .flatMap(m -> m.entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(Map.Entry::getValue)));
     }
+
+    public Map<String, Double> runIla(Data data) {
+
+        List<Map<String, Double>> scores = new ArrayList<>();
+        for (int foldNumber = 0; foldNumber < Params.numberFolds; foldNumber++) {
+            scores.add(new InductiveLearningAlgorithm(data, foldNumber).doScoring());
+        }
+
+        return scores.stream()
+                .flatMap(m -> m.entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(Map.Entry::getValue)));
+    }
 }
