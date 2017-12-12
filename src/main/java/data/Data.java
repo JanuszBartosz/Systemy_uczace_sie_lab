@@ -16,7 +16,7 @@ public class Data {
     private Crosvalidator crosvalidator;
     public final String mostCommonClass;
 
-    public Data(List<List<String>> dataSet, List<String> attributeNames, List<String> attributeTypes, List<String> classNames) {
+    Data(List<List<String>> dataSet, List<String> attributeNames, List<String> attributeTypes, List<String> classNames) {
         Collections.shuffle(dataSet);
         this.dataSet = dataSet.stream()
                 .map(List::toArray)
@@ -81,12 +81,6 @@ public class Data {
         }
         return transposedMatrix;
     }
-
-
-    public Crosvalidator getCrosvalidator() {
-        return this.crosvalidator;
-    }
-
 
     public class Crosvalidator {
 

@@ -9,28 +9,19 @@ import java.util.stream.Collectors;
 /**
  * @author <a href="mailto:bartosz.janusz@fingo.pl">Bartosz Janusz - FINGO</a>
  */
-public class NaiveBayes {
+class NaiveBayes extends Model{
 
     private Map<String, Double> probAPriori;                //<Class, Probability>
     private List<Map<String, Map<String, Double>>> chances; // Columns <Attribute <Class, Probability>>
-    private Map<String, Map<String, Double>> confusionTable;
 
-    private final String[][] trainingData;
-    private final String[][] testData;
-    private final Data data;
-
-
-    public NaiveBayes(Data data, int foldNumber) {
-        this.data = data;
-        Data.Crosvalidator crosvalidator = data.createCrosvalidator(Params.numberFolds, foldNumber);
-        this.trainingData = crosvalidator.getTrainingData();
-        this.testData = crosvalidator.getTestData();
+    NaiveBayes(Data data, int foldNumber) {
+        super(data, foldNumber);
         computeProbAPriori();
         computeChances();
         run();
     }
 
-    public Map<String, Double> doScoring() {
+    Map<String, Double> doScoring() {
         List<Map<String, Double>> scores = new ArrayList<>();
 
         //Accuracy
@@ -72,34 +63,12 @@ public class NaiveBayes {
             confusionMatrix.get(predicted).compute(real, (k, v) -> v + 1.0d);
         }
 
-        Map<String, Map<String, Double>> emptyConfusionTable = makeEmptyConfusionTable();
-        for (String className : data.getClassNames()) {
-            Map<String, Double> classMap = emptyConfusionTable.get(className);
-            classMap.compute("TP", (k, v) -> v + confusionMatrix.get(className).get(className));
-            classMap.compute("FP", (k, v) -> v + confusionMatrix.get(className)
-                    .entrySet().stream()
-                    .filter(e -> !e.getKey().equals(className))
-                    .map(Map.Entry::getValue)
-                    .reduce(Double::sum).orElse(0.0d));
-            classMap.compute("FN", (k, v) -> v + confusionMatrix.entrySet().stream()
-                    .filter(e -> !e.getKey().equals(className))
-                    .map(Map.Entry::getValue)
-                    .map(m -> m.get(className))
-                    .reduce(Double::sum).orElse(0.0d));
-            classMap.compute("TN", (k, v) -> v + confusionMatrix.entrySet().stream()
-                    .filter(e -> !e.getKey().equals(className))
-                    .map(Map.Entry::getValue)
-                    .flatMap(m -> m.entrySet().stream())
-                    .filter(e -> !e.getKey().equals(className))
-                    .map(Map.Entry::getValue)
-                    .reduce(Double::sum).orElse(0.0d));
-        }
-        this.confusionTable = emptyConfusionTable;
+        this.confusionTable = makeConfusionTable(confusionMatrix);
     }
 
     private void computeProbAPriori() {
 
-        String[] classColumn = Arrays.stream(trainingData).map(a->a[a.length-1]).toArray(String[]::new);
+        String[] classColumn = Arrays.stream(trainingData).map(a -> a[a.length - 1]).toArray(String[]::new);
 
         Map<String, Double> occurrences = new HashMap<>();
 
@@ -125,10 +94,7 @@ public class NaiveBayes {
 
                 String attr = trainingData[rowIdx][colIdx];
                 String attrClass = trainingData[rowIdx][trainingData[0].length - 1];
-                allOccurrences.get(colIdx).get(attr)
-                        .compute(attrClass,
-                                (k, v) -> v + 1.0d
-                        );
+                allOccurrences.get(colIdx).get(attr).compute(attrClass, (k, v) -> v + 1.0d);
             }
 
             for (Map<String, Double> occurrencesPerClass : allOccurrences.get(colIdx).values()) {
@@ -160,32 +126,5 @@ public class NaiveBayes {
             classMap.put(className, initialValue);
         }
         return classMap;
-    }
-
-    private Map<String, Map<String, Double>> makeEmptyConfusionMatrix() {
-
-        Map<String, Map<String, Double>> confusionMatrix = new HashMap<>();
-        for (String className : data.getClassNames()) {
-            Map<String, Double> map = new HashMap<>();
-            for (String className2 : data.getClassNames()) {
-                map.put(className2, 0.0d);
-            }
-            confusionMatrix.put(className, map);
-        }
-        return confusionMatrix;
-    }
-
-    private Map<String, Map<String, Double>> makeEmptyConfusionTable() {
-
-        Map<String, Map<String, Double>> confusionMatrix = new HashMap<>();
-        for (String className : data.getClassNames()) {
-            Map<String, Double> map = new HashMap<>();
-            map.put("TP", 0.0d);
-            map.put("FP", 0.0d);
-            map.put("TN", 0.0d);
-            map.put("FN", 0.0d);
-            confusionMatrix.put(className, map);
-        }
-        return confusionMatrix;
     }
 }

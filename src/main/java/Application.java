@@ -3,9 +3,7 @@ package main.java;
 import main.java.data.Data;
 import main.java.data.DataReader;
 import main.java.data.discretizator.impl.DiscretizatorType;
-import main.java.model.InductiveLearningAlgorithm;
 import main.java.model.Models;
-import main.java.model.NaiveBayes;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,9 +18,7 @@ public class Application {
 
     public static void main(String[] args) throws IOException {
 
-        List<String> datasetFilenames = Arrays.asList("wine", "ecoli", "vertebral");
-
-        //InductiveLearningAlgorithm ila = new InductiveLearningAlgorithm(new DataReader("ecoli").readData(), 1);
+        List<String> datasetFilenames = Arrays.asList("wine");
 
         Models models = new Models();
 

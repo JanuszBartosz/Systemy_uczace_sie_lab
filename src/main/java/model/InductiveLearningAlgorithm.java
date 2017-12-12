@@ -1,6 +1,5 @@
 package main.java.model;
 
-import main.java.Params;
 import main.java.data.Data;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -9,28 +8,20 @@ import org.apache.commons.math3.util.Combinations;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class InductiveLearningAlgorithm {
+class InductiveLearningAlgorithm extends Model {
 
 
-    private final Data data;
-    private final String[][] trainingData;
-    private final String[][] testData;
     private Map<String, List<String[]>> dataSubTables;
     private final List<String> attributeNames;
     private final Map<String, Integer> attributeNamesMap;
     private List<Pair<List<Pair<String, String>>, String>> rules;
-    private Map<String, Map<String, Double>> confusionTable;
 
-    public InductiveLearningAlgorithm(Data data, int foldNumber) {
-        this.data = data;
+    InductiveLearningAlgorithm(Data data, int foldNumber) {
+        super(data, foldNumber);
         this.attributeNames = data.getAttributeNames();
-        Data.Crosvalidator crosvalidator = data.createCrosvalidator(Params.numberFolds, foldNumber);
         this.rules = new ArrayList<>();
-        this.trainingData = crosvalidator.getTrainingData();
-        this.testData = crosvalidator.getTestData();
         this.dataSubTables = partitionTrainingData();
         this.attributeNamesMap = new HashMap<>();
-
         for (int i = 0; i < attributeNames.size(); i++) {
             this.attributeNamesMap.put(attributeNames.get(i), i);
         }
@@ -38,7 +29,7 @@ public class InductiveLearningAlgorithm {
         run();
     }
 
-    public Map<String, Double> doScoring() {
+    Map<String, Double> doScoring() {
         List<Map<String, Double>> scores = new ArrayList<>();
 
         //Accuracy
@@ -56,7 +47,6 @@ public class InductiveLearningAlgorithm {
         }
 
         return scores.stream().flatMap(m -> m.entrySet().stream())
-                //.filter(e -> e.getValue() != Double.NaN)
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(Map.Entry::getValue)));
     }
 
@@ -76,49 +66,18 @@ public class InductiveLearningAlgorithm {
 
             for (Pair<List<Pair<String, String>>, String> rule : rules) {
                 predicted = matchesRule(row, rule);
+                if (predicted != null)
+                    break;
             }
 
-            predicted = predicted == null ? data.mostCommonClass : predicted;
+            //predicted = predicted == null ? data.mostCommonClass : predicted;
 
             String real = row[testData[0].length - 1];
-            confusionMatrix.get(predicted).compute(real, (k, v) -> v + 1.0d);
+            if (predicted != null)
+                confusionMatrix.get(predicted).compute(real, (k, v) -> v + 1.0d);
         }
 
-        Map<String, Map<String, Double>> emptyConfusionTable = makeEmptyConfusionTable();
-        for (String className : data.getClassNames()) {
-            Map<String, Double> classMap = emptyConfusionTable.get(className);
-            classMap.compute("TP", (k, v) -> v + confusionMatrix.get(className).get(className));
-            classMap.compute("FP", (k, v) -> v + confusionMatrix.get(className)
-                    .entrySet().stream()
-                    .filter(e -> !e.getKey().equals(className))
-                    .map(Map.Entry::getValue)
-                    .reduce(Double::sum).orElse(0.0d));
-            classMap.compute("FN", (k, v) -> v + confusionMatrix.entrySet().stream()
-                    .filter(e -> !e.getKey().equals(className))
-                    .map(Map.Entry::getValue)
-                    .map(m -> m.get(className))
-                    .reduce(Double::sum).orElse(0.0d));
-            classMap.compute("TN", (k, v) -> v + confusionMatrix.entrySet().stream()
-                    .filter(e -> !e.getKey().equals(className))
-                    .map(Map.Entry::getValue)
-                    .flatMap(m -> m.entrySet().stream())
-                    .filter(e -> !e.getKey().equals(className))
-                    .map(Map.Entry::getValue)
-                    .reduce(Double::sum).orElse(0.0d));
-        }
-        this.confusionTable = emptyConfusionTable;
-    }
-
-    private String matchesRule(String[] row, Pair<List<Pair<String, String>>, String> rule) {
-
-        boolean match = true;
-        for (Pair<String, String> attribute : rule.getLeft()) {
-            if (!attribute.getRight().equals(row[attributeNamesMap.get(attribute.getLeft())])) {
-                match = false;
-            }
-        }
-
-        return match ? rule.getRight() : null;
+        this.confusionTable = makeConfusionTable(confusionMatrix);
     }
 
     private void extractRules() {
@@ -128,7 +87,7 @@ public class InductiveLearningAlgorithm {
             processSubTable(new LinkedList<>(currentSubtable), otherSubtables);
         }
 
-        rules.sort(Comparator.comparing(r -> r.getLeft().size()));
+        //rules.sort(Comparator.comparing(r -> r.getLeft().size()));
     }
 
     private void processSubTable(List<String[]> currentSubtable, List<List<String[]>> otherSubtables) {
@@ -177,7 +136,6 @@ public class InductiveLearningAlgorithm {
         }
     }
 
-
     private void removeClassifiedRows(Pair<int[], String[]> maxCombination, List<String[]> currentSubtable) {
 
         String[] attributeCombination = makeAttributeCombination(maxCombination);
@@ -201,7 +159,6 @@ public class InductiveLearningAlgorithm {
         );
     }
 
-
     private boolean checkIfUnique(int[] attrSubset, String[] currentRow, List<List<String[]>> otherSubtables) {
 
         for (List<String[]> otherSubtable : otherSubtables) {
@@ -222,23 +179,17 @@ public class InductiveLearningAlgorithm {
         return true;
     }
 
-    private int countOccurrences(int[] attrSubset, String[] currentRow, List<String[]> currentSubtable) {
+    private String matchesRule(String[] row, Pair<List<Pair<String, String>>, String> rule) {
 
-        int cnt = 0;
-        for (String[] row : currentSubtable) {
-
-            boolean match = true;
-            for (int attrIdx : attrSubset) {
-                if (!currentRow[attrIdx].equals(row[attrIdx])) {
-                    match = false;
-                }
+        boolean match = true;
+        for (Pair<String, String> attribute : rule.getLeft()) {
+            if (!attribute.getRight().equals(row[attributeNamesMap.get(attribute.getLeft())])) {
+                match = false;
             }
-            if (match)
-                cnt++;
         }
-        return cnt;
-    }
 
+        return match ? rule.getRight() : null;
+    }
 
     private String[] makeAttributeCombination(int[] indexes, String[] array) {
         String[] subArray = new String[indexes.length];
@@ -260,30 +211,20 @@ public class InductiveLearningAlgorithm {
         return subArray;
     }
 
-    private Map<String, Map<String, Double>> makeEmptyConfusionMatrix() {
+    private int countOccurrences(int[] attrSubset, String[] currentRow, List<String[]> currentSubtable) {
 
-        Map<String, Map<String, Double>> confusionMatrix = new HashMap<>();
-        for (String className : data.getClassNames()) {
-            Map<String, Double> map = new HashMap<>();
-            for (String className2 : data.getClassNames()) {
-                map.put(className2, 0.0d);
+        int cnt = 0;
+        for (String[] row : currentSubtable) {
+
+            boolean match = true;
+            for (int attrIdx : attrSubset) {
+                if (!currentRow[attrIdx].equals(row[attrIdx])) {
+                    match = false;
+                }
             }
-            confusionMatrix.put(className, map);
+            if (match)
+                cnt++;
         }
-        return confusionMatrix;
-    }
-
-    private Map<String, Map<String, Double>> makeEmptyConfusionTable() {
-
-        Map<String, Map<String, Double>> confusionMatrix = new HashMap<>();
-        for (String className : data.getClassNames()) {
-            Map<String, Double> map = new HashMap<>();
-            map.put("TP", 0.0d);
-            map.put("FP", 0.0d);
-            map.put("TN", 0.0d);
-            map.put("FN", 0.0d);
-            confusionMatrix.put(className, map);
-        }
-        return confusionMatrix;
+        return cnt;
     }
 }
