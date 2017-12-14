@@ -53,9 +53,8 @@ public class KNearestNeighbours extends Model {
                     .getKey();
 
             String predictedClass = classMapDoubleToString.get(prediction);
-            String real = classMapDoubleToString.get(row[testDataReal.length-1]);
+            String real = classMapDoubleToString.get(row[testDataReal.length - 1]);
             confusionMatrix.get(predictedClass).compute(real, (k, v) -> v + 1.0d);
-
         }
         this.confusionTable = makeConfusionTable(confusionMatrix);
     }
@@ -67,4 +66,6 @@ public class KNearestNeighbours extends Model {
         }
         return Math.sqrt(sum);
     }
+
+    private double manhattanDistance()
 }
