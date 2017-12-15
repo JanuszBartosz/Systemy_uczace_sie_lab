@@ -18,7 +18,7 @@ public class Application {
 
     public static void main(String[] args) throws IOException {
 
-        List<String> datasetFilenames = Arrays.asList("wine");
+        List<String> datasetFilenames = Arrays.asList("vertebral");
 
         Models models = new Models();
 
@@ -33,10 +33,10 @@ public class Application {
                 Params.numberBins = numberBins;
                 Params.type = DiscretizatorType.WIDTH;
                 data = new DataReader(filename).readData();
-                allScores.add(models.runIla(data));
+                allScores.add(models.runKNN(data));
                 Params.type = DiscretizatorType.FREQUENCY;
                 data = new DataReader(filename).readData();
-                allScores.add(models.runIla(data));
+                allScores.add(models.runKNN(data));
             }
 
             List<String> lines = new ArrayList<>();

@@ -21,27 +21,7 @@ class NaiveBayes extends Model{
         run();
     }
 
-    Map<String, Double> doScoring() {
-        List<Map<String, Double>> scores = new ArrayList<>();
 
-        //Accuracy
-        for (Map.Entry<String, Map<String, Double>> classConfusionTable : confusionTable.entrySet()) {
-            Double tp = classConfusionTable.getValue().get("TP");
-            Double tn = classConfusionTable.getValue().get("TN");
-            Double fp = classConfusionTable.getValue().get("FP");
-            Double fn = classConfusionTable.getValue().get("FN");
-            Map<String, Double> score = new HashMap<>();
-            score.put("ACC", (tp + tn) / (tp + tn + fp + fn));
-            score.put("PREC", tp / (tp + fp));
-            score.put("REC", tp / (tp + fn));
-            score.put("FSCR", 2 * tp / (2 * tp + fp + fn));
-            scores.add(score);
-        }
-
-        return scores.stream().flatMap(m -> m.entrySet().stream())
-                //.filter(e -> e.getValue() != Double.NaN)
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(Map.Entry::getValue)));
-    }
 
     private void run() {
         Map<String, Map<String, Double>> confusionMatrix = makeEmptyConfusionMatrix(); //Predicted <Real, Count>
