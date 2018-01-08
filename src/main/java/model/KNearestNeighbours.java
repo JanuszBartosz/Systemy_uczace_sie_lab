@@ -3,6 +3,7 @@ package main.java.model;
 import main.java.data.Data;
 import org.apache.commons.math3.util.Pair;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,24 +15,44 @@ public class KNearestNeighbours extends Model {
     private Map<String, Double> classMapStringToDouble;
     private Map<Double, String> classMapDoubleToString;
 
-    KNearestNeighbours(Data data, int foldNumber, int K, int distanceParam, VotingType type) {
+    KNearestNeighbours(Data data, int foldNumber, int K, int distanceParam, VotingType type, boolean normalization) {
         super(data, foldNumber);
         this.K = K;
         this.classMapStringToDouble = data.getClassNames().stream().collect(Collectors.toMap(v -> v, v -> (double) data.getClassNames().indexOf(v)));
         this.classMapDoubleToString = data.getClassNames().stream().collect(Collectors.toMap(v -> (double) data.getClassNames().indexOf(v), v -> v));
-        String s = "pp";
         this.trainingDataReal = Arrays.stream(trainingData)
                 .map(a -> Arrays.stream(a)
-                        .mapToDouble(v -> {Double d = classMapStringToDouble.get(v);
-                            return d == null ? Double.parseDouble(v): d;}).toArray())
+                        .mapToDouble(v -> {
+                            Double d = classMapStringToDouble.get(v);
+                            return d == null ? Double.parseDouble(v) : d;
+                        }).toArray())
+                .map((a) -> normalization ? normalize(a) : a)
                 .toArray(double[][]::new);
 
         this.testDataReal = Arrays.stream(testData)
                 .map(a -> Arrays.stream(a)
-                        .mapToDouble(v -> {Double d = classMapStringToDouble.get(v);
-                        return d == null ? Double.parseDouble(v): d;}).toArray())
+                        .mapToDouble(v -> {
+                            Double d = classMapStringToDouble.get(v);
+                            return d == null ? Double.parseDouble(v) : d;
+                        }).toArray())
+                .map((a) -> normalization ? normalize(a) : a)
                 .toArray(double[][]::new);
         run(distanceParam, type);
+    }
+
+    private double[] normalize(double[] a) {
+        double sum = 0;
+
+        for (int i = 0; i < a.length - 1; i++) {
+            double v = a[i];
+            sum += v * v;
+        }
+        double length = Math.sqrt(sum);
+
+        for (int i = 0; i < a.length - 1; i++) {
+            a[i] /= length;
+        }
+        return a;
     }
 
     void run(int distanceParam, VotingType type) {
@@ -98,7 +119,7 @@ public class KNearestNeighbours extends Model {
         for (int i = 0; i < array1.length - 1; i++) {
             sum += Math.pow(Math.abs(array1[i] - array2[i]), p);
         }
-        return nthroot(p, sum);
+        return Math.pow(sum, (double) 1 / (double) p);
     }
 
 
@@ -136,6 +157,6 @@ public class KNearestNeighbours extends Model {
     }
 
     public enum VotingType {
-        STANDARD, WEIGHTED, RANKING;
+        STANDARD, WEIGHTED, RANKING
     }
 }

@@ -24,7 +24,7 @@ public class Data {
         this.attributeNames = attributeNames;
         this.attributeTypes = attributeTypes;
         this.classNames = classNames;
-        discretize();
+        //discretize();
         this.transposedDataSet = transpose(this.dataSet);
         this.mostCommonClass = Arrays.stream(transposedDataSet[transposedDataSet.length - 1])
                 .collect(Collectors.groupingBy(p -> p, Collectors.counting()))

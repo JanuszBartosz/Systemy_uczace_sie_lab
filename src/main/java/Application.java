@@ -3,6 +3,7 @@ package main.java;
 import main.java.data.Data;
 import main.java.data.DataReader;
 import main.java.data.discretizator.impl.DiscretizatorType;
+import main.java.model.KNearestNeighbours;
 import main.java.model.Models;
 
 import java.io.IOException;
@@ -13,12 +14,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Application {
 
     public static void main(String[] args) throws IOException {
 
-        List<String> datasetFilenames = Arrays.asList("vertebral");
+        List<String> datasetFilenames = Arrays.asList("wine", "ecoli", "vertebral", "wholesale","iris" );
+        List<Integer> distParams = Arrays.asList(1, 2, 5);
 
         Models models = new Models();
 
@@ -26,26 +29,42 @@ public class Application {
 
         for (String filename : datasetFilenames) {
 
-            Data data;
-            List<Map<String, Double>> allScores = new ArrayList<>();
+            Data data = new DataReader(filename).readData();
 
-            for (int numberBins = 2; numberBins <= 10; numberBins += 2) {
-                Params.numberBins = numberBins;
-                Params.type = DiscretizatorType.WIDTH;
-                data = new DataReader(filename).readData();
-                allScores.add(models.runKNN(data));
-                Params.type = DiscretizatorType.FREQUENCY;
-                data = new DataReader(filename).readData();
-                allScores.add(models.runKNN(data));
+            for (Integer distParam : distParams) {
+                for (KNearestNeighbours.VotingType type : KNearestNeighbours.VotingType.values()) {
+                    List<Map<String, Double>> allScores = new ArrayList<>();
+
+                    for (int K = 2; K <= 20; K += 2) {
+                        allScores.add(models.runKNN(data, K, distParam, type, false));
+                    }
+
+                    List<String> lines = new ArrayList<>();
+
+                    for (Map<String, Double> score : allScores) {
+                        lines.add(score.values().stream().map(Object::toString).collect(Collectors.joining(",")));
+                    }
+                    Files.deleteIfExists(Paths.get("scores", filename, type + "_" + distParam + ".txt"));
+                    Files.write(Paths.get("scores", filename, type + "_" + distParam + ".txt"), lines);
+                }
             }
+            for (Integer distParam : distParams) {
+                for (KNearestNeighbours.VotingType type : KNearestNeighbours.VotingType.values()) {
+                    List<Map<String, Double>> allScores = new ArrayList<>();
 
-            List<String> lines = new ArrayList<>();
+                    for (int K = 2; K <= 20; K += 2) {
+                        allScores.add(models.runKNN(data, K, distParam, type, true));
+                    }
 
-            for (Map<String, Double> score : allScores) {
-                lines.add(score.values().stream().map(Object::toString).collect(Collectors.joining(",")));
+                    List<String> lines = new ArrayList<>();
+
+                    for (Map<String, Double> score : allScores) {
+                        lines.add(score.values().stream().map(Object::toString).collect(Collectors.joining(",")));
+                    }
+                    Files.deleteIfExists(Paths.get("scores", filename, type + "_" + distParam + "_normalized.txt"));
+                    Files.write(Paths.get("scores", filename, type + "_" + distParam + "_normalized.txt"), lines);
+                }
             }
-            Files.deleteIfExists(Paths.get("scores", filename + "_score.txt"));
-            Files.write(Paths.get("scores", filename + "_score.txt"), lines);
         }
     }
 }
