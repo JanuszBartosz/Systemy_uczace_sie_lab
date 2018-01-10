@@ -3,7 +3,6 @@ package main.java.model;
 import main.java.data.Data;
 import org.apache.commons.math3.util.Pair;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -122,26 +121,6 @@ public class KNearestNeighbours extends Model {
         return Math.pow(sum, (double) 1 / (double) p);
     }
 
-
-    private double nthroot(int n, double A) {
-        return nthroot(n, A, .001);
-    }
-
-    private double nthroot(int n, double A, double p) {
-        if (A < 0) {
-            System.err.println("A < 0");// we handle only real positive numbers
-            return -1;
-        } else if (A == 0) {
-            return 0;
-        }
-        double x_prev = A;
-        double x = A / n;  // starting "guessed" value...
-        while (Math.abs(x - x_prev) > p) {
-            x_prev = x;
-            x = ((n - 1.0) * x + A / Math.pow(x, n - 1.0)) / n;
-        }
-        return x;
-    }
 
     private Double performVoting(Set<Pair<double[], Double>> set, VotingType type) {
         switch (type) {
