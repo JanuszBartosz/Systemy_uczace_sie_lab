@@ -16,9 +16,9 @@ public class DataReader {
 
     private Path dataFilePath;
     private Path namesFilePath;
-    private Path directoryPath = Paths.get("data");
 
     public DataReader(String filePath) {
+        Path directoryPath = Paths.get("data");
         this.dataFilePath = directoryPath.resolve(filePath + ".data");
         this.namesFilePath = directoryPath.resolve(filePath + ".names");
     }

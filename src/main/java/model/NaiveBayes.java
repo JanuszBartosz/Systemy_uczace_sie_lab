@@ -21,8 +21,6 @@ class NaiveBayes extends Model{
         run();
     }
 
-
-
     private void run() {
         Map<String, Map<String, Double>> confusionMatrix = makeEmptyConfusionMatrix(); //Predicted <Real, Count>
 

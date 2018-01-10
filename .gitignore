@@ -24,5 +24,4 @@ hs_err_pid*
 # IntelliJ IDEA
 .idea/
 
-data/
 scores/
