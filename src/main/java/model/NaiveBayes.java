@@ -21,6 +21,28 @@ class NaiveBayes extends Model{
         run();
     }
 
+    NaiveBayes(Data data, String[][] trainingData, String[][] testData){
+        super(data, trainingData, testData);
+        computeProbAPriori();
+        computeChances();
+    }
+
+    private String predict(String[] observation){
+
+        Map<String, Double> probability = makeEmptyClassMap(0.0d);
+
+        for (int colIdx = 0; colIdx < observation.length - 1; colIdx++) {
+            String attr = observation[colIdx];
+            Map<String, Double> chance = chances.get(colIdx).get(attr);
+
+            for (Map.Entry<String, Double> entry : chance.entrySet()) {
+                probability.compute(entry.getKey(), (k, v) -> v + entry.getValue() * probAPriori.get(entry.getKey()));
+            }
+        }
+
+        return Collections.max(probability.entrySet(), Map.Entry.comparingByValue()).getKey();
+    }
+
     private void run() {
         Map<String, Map<String, Double>> confusionMatrix = makeEmptyConfusionMatrix(); //Predicted <Real, Count>
 

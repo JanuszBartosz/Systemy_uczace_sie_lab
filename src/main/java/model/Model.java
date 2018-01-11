@@ -16,12 +16,19 @@ public abstract class Model {
     final String[][] testData;
     Map<String, Map<String, Double>> confusionTable;
 
+    Model(Data data, String[][] trainingData, String[][] testData ) {
+        this.data = data;
+        this.trainingData = trainingData;
+        this.testData = testData;
+    }
+
     Model(Data data, int foldNumber) {
         this.data = data;
         Data.Crosvalidator crosvalidator = data.createCrosvalidator(Params.numberFolds, foldNumber);
         this.trainingData = crosvalidator.getTrainingData();
         this.testData = crosvalidator.getTestData();
     }
+
 
     Map<String, Double> doScoring() {
         List<Map<String, Double>> scores = new ArrayList<>();
@@ -44,6 +51,7 @@ public abstract class Model {
                 //.filter(e -> e.getValue() != Double.NaN)
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(Map.Entry::getValue)));
     }
+
     Map<String, Map<String, Double>> makeConfusionTable(Map<String, Map<String, Double>> confusionMatrix) {
         Map<String, Map<String, Double>> emptyConfusionTable = makeEmptyConfusionTable();
         for (String className : data.getClassNames()) {
@@ -96,5 +104,4 @@ public abstract class Model {
         }
         return confusionMatrix;
     }
-
 }
