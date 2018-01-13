@@ -3,7 +3,6 @@ package main.java;
 import main.java.data.Data;
 import main.java.data.DataReader;
 import main.java.data.discretizator.impl.DiscretizatorType;
-import main.java.model.KNearestNeighbours;
 import main.java.model.Models;
 
 import java.io.IOException;
@@ -14,14 +13,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Application {
 
     public static void main(String[] args) throws IOException {
 
-        List<String> datasetFilenames = Arrays.asList("wine", "ecoli", "vertebral", "wholesale","iris" );
-        List<Integer> distParams = Arrays.asList(1, 2, 5);
+        List<String> datasetFilenames = Arrays.asList("wine", "ecoli", "vertebral");
+
+        //InductiveLearningAlgorithm ila = new InductiveLearningAlgorithm(new DataReader("ecoli").readData(), 1);
 
         Models models = new Models();
 
@@ -29,42 +28,21 @@ public class Application {
 
         for (String filename : datasetFilenames) {
 
-            Data data = new DataReader(filename).readData();
+            Data data;
+            List<Map<String, Double>> allScores = new ArrayList<>();
 
-            for (Integer distParam : distParams) {
-                for (KNearestNeighbours.VotingType type : KNearestNeighbours.VotingType.values()) {
-                    List<Map<String, Double>> allScores = new ArrayList<>();
+            Params.numberBins = 10;
+            Params.type = DiscretizatorType.FREQUENCY;
+            data = new DataReader(filename).readData();
+            allScores.add(models.runNaiveBayesBoostingEnsemble(data, 0, 10));
 
-                    for (int K = 2; K <= 20; K += 2) {
-                        allScores.add(models.runKNN(data, K, distParam, type, false));
-                    }
+            List<String> lines = new ArrayList<>();
 
-                    List<String> lines = new ArrayList<>();
-
-                    for (Map<String, Double> score : allScores) {
-                        lines.add(score.values().stream().map(Object::toString).collect(Collectors.joining(",")));
-                    }
-                    Files.deleteIfExists(Paths.get("scores", filename, type + "_" + distParam + ".txt"));
-                    Files.write(Paths.get("scores", filename, type + "_" + distParam + ".txt"), lines);
-                }
+            for (Map<String, Double> score : allScores) {
+                lines.add(score.values().stream().map(Object::toString).collect(Collectors.joining(",")));
             }
-            for (Integer distParam : distParams) {
-                for (KNearestNeighbours.VotingType type : KNearestNeighbours.VotingType.values()) {
-                    List<Map<String, Double>> allScores = new ArrayList<>();
-
-                    for (int K = 2; K <= 20; K += 2) {
-                        allScores.add(models.runKNN(data, K, distParam, type, true));
-                    }
-
-                    List<String> lines = new ArrayList<>();
-
-                    for (Map<String, Double> score : allScores) {
-                        lines.add(score.values().stream().map(Object::toString).collect(Collectors.joining(",")));
-                    }
-                    Files.deleteIfExists(Paths.get("scores", filename, type + "_" + distParam + "_normalized.txt"));
-                    Files.write(Paths.get("scores", filename, type + "_" + distParam + "_normalized.txt"), lines);
-                }
-            }
+            Files.deleteIfExists(Paths.get("scores", filename + "_score.txt"));
+            Files.write(Paths.get("scores", filename + "_score.txt"), lines);
         }
     }
 }

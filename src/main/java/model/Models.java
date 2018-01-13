@@ -59,7 +59,7 @@ public class Models {
     public Map<String, Double> runNaiveBayesBoostingEnsemble(Data data, int trainingDataSize, int classifiersNumber) {
         List<Map<String, Double>> scores = new ArrayList<>();
         for (int foldNumber = 0; foldNumber < Params.numberFolds; foldNumber++) {
-            scores.add(new NaiveBayesBaggingEnsemble(data, foldNumber, trainingDataSize, classifiersNumber).doScoring());
+            scores.add(new NaiveBayesBoostingEnsemble(data, foldNumber, trainingDataSize, classifiersNumber).doScoring());
         }
 
         return scores.stream()
