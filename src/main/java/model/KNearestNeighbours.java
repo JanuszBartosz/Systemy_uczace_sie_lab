@@ -135,6 +135,7 @@ public class KNearestNeighbours extends Model {
         }
     }
 
+
     public enum VotingType {
         STANDARD, WEIGHTED, RANKING
     }

@@ -34,7 +34,7 @@ public class Models {
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(Map.Entry::getValue)));
     }
 
-    public Map<String, Double> runKNN(Data data, int K, int distParam, KNearestNeighbours.VotingType type, boolean normalize){
+    public Map<String, Double> runKNN(Data data, int K, int distParam, KNearestNeighbours.VotingType type, boolean normalize) {
 
         List<Map<String, Double>> scores = new ArrayList<>();
         for (int foldNumber = 0; foldNumber < Params.numberFolds; foldNumber++) {
@@ -43,6 +43,27 @@ public class Models {
         return scores.stream()
                 .flatMap(m -> m.entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(Map.Entry::getValue)));
+    }
 
+    public Map<String, Double> runNaiveBayesBaggingEnsemble(Data data, int trainingDataSize, int classifiersNumber) {
+        List<Map<String, Double>> scores = new ArrayList<>();
+        for (int foldNumber = 0; foldNumber < Params.numberFolds; foldNumber++) {
+            scores.add(new NaiveBayesBaggingEnsemble(data, foldNumber, trainingDataSize, classifiersNumber).doScoring());
+        }
+
+        return scores.stream()
+                .flatMap(m -> m.entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(Map.Entry::getValue)));
+    }
+
+    public Map<String, Double> runNaiveBayesBoostingEnsemble(Data data, int trainingDataSize, int classifiersNumber) {
+        List<Map<String, Double>> scores = new ArrayList<>();
+        for (int foldNumber = 0; foldNumber < Params.numberFolds; foldNumber++) {
+            scores.add(new NaiveBayesBaggingEnsemble(data, foldNumber, trainingDataSize, classifiersNumber).doScoring());
+        }
+
+        return scores.stream()
+                .flatMap(m -> m.entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(Map.Entry::getValue)));
     }
 }

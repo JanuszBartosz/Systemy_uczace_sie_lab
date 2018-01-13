@@ -36,7 +36,7 @@ class InductiveLearningAlgorithm extends Model {
         return Arrays.stream(this.trainingData).collect(Collectors.groupingBy(a -> a[arrayLength - 1]));
     }
 
-    private void run() {
+    void run() {
         Map<String, Map<String, Double>> confusionMatrix = makeEmptyConfusionMatrix(); //Predicted <Real, Count>
 
         for (String[] row : testData) {

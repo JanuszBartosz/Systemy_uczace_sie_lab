@@ -1,6 +1,5 @@
 package main.java.model;
 
-import main.java.Params;
 import main.java.data.Data;
 
 import java.util.*;
@@ -9,7 +8,7 @@ import java.util.stream.Collectors;
 /**
  * @author <a href="mailto:bartosz.janusz@fingo.pl">Bartosz Janusz - FINGO</a>
  */
-class NaiveBayes extends Model{
+class NaiveBayes extends Model {
 
     private Map<String, Double> probAPriori;                //<Class, Probability>
     private List<Map<String, Map<String, Double>>> chances; // Columns <Attribute <Class, Probability>>
@@ -21,13 +20,13 @@ class NaiveBayes extends Model{
         run();
     }
 
-    NaiveBayes(Data data, String[][] trainingData, String[][] testData){
+    NaiveBayes(Data data, String[][] trainingData, String[][] testData) {
         super(data, trainingData, testData);
         computeProbAPriori();
         computeChances();
     }
 
-    private String predict(String[] observation){
+    String predict(String[] observation) {
 
         Map<String, Double> probability = makeEmptyClassMap(0.0d);
 
@@ -43,7 +42,7 @@ class NaiveBayes extends Model{
         return Collections.max(probability.entrySet(), Map.Entry.comparingByValue()).getKey();
     }
 
-    private void run() {
+    void run() {
         Map<String, Map<String, Double>> confusionMatrix = makeEmptyConfusionMatrix(); //Predicted <Real, Count>
 
         for (int rowIdx = 0; rowIdx < testData.length; rowIdx++) {
