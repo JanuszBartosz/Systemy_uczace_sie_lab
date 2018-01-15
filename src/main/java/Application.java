@@ -30,41 +30,25 @@ public class Application {
         for (String filename : datasetFilenames) {
 
             Data data = new DataReader(filename).readData();
-
+            List<String> lines = new ArrayList<>();
+            List<Map<String, Double>> allScores = new ArrayList<>();
             for (Integer distParam : distParams) {
-                for (KNearestNeighbours.VotingType type : KNearestNeighbours.VotingType.values()) {
-                    List<Map<String, Double>> allScores = new ArrayList<>();
+//                for (KNearestNeighbours.VotingType type : KNearestNeighbours.VotingType.values()) {
 
-                    for (int K = 2; K <= 20; K += 2) {
-                        allScores.add(models.runKNN(data, K, distParam, type, false));
+
+                    //for (int K = 2; K <= 20; K += 2) {
+                        allScores.add(models.runKNN(data, 10, distParam, KNearestNeighbours.VotingType.STANDARD, false));
                     }
 
-                    List<String> lines = new ArrayList<>();
+
 
                     for (Map<String, Double> score : allScores) {
                         lines.add(score.values().stream().map(Object::toString).collect(Collectors.joining(",")));
                     }
-                    Files.deleteIfExists(Paths.get("scores", filename, type + "_" + distParam + ".txt"));
-                    Files.write(Paths.get("scores", filename, type + "_" + distParam + ".txt"), lines);
-                }
-            }
-            for (Integer distParam : distParams) {
-                for (KNearestNeighbours.VotingType type : KNearestNeighbours.VotingType.values()) {
-                    List<Map<String, Double>> allScores = new ArrayList<>();
+                    Files.deleteIfExists(Paths.get("scores", filename, "STANDARD" + "_" + "distParam" + ".txt"));
+                    Files.write(Paths.get("scores", filename, "STANDARD" + "_" + "distParam" + ".txt"), lines);
 
-                    for (int K = 2; K <= 20; K += 2) {
-                        allScores.add(models.runKNN(data, K, distParam, type, true));
-                    }
-
-                    List<String> lines = new ArrayList<>();
-
-                    for (Map<String, Double> score : allScores) {
-                        lines.add(score.values().stream().map(Object::toString).collect(Collectors.joining(",")));
-                    }
-                    Files.deleteIfExists(Paths.get("scores", filename, type + "_" + distParam + "_normalized.txt"));
-                    Files.write(Paths.get("scores", filename, type + "_" + distParam + "_normalized.txt"), lines);
-                }
-            }
+            //}
         }
     }
 }
