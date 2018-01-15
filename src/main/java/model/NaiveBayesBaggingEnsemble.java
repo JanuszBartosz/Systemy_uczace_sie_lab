@@ -13,7 +13,7 @@ public class NaiveBayesBaggingEnsemble extends Model {
 
     private List<NaiveBayes> classifiers;
 
-    NaiveBayesBaggingEnsemble(Data data, int foldNumber, int trainingDataSize, int classifiersNumber) {
+    NaiveBayesBaggingEnsemble(Data data, int foldNumber, double trainingDataSize, int classifiersNumber) {
         super(data, foldNumber);
 
         trainingDataSize = trainingDataSize == 0 ? trainingData.length : trainingDataSize;
@@ -51,11 +51,12 @@ public class NaiveBayesBaggingEnsemble extends Model {
         this.confusionTable = makeConfusionTable(confusionMatrix);
     }
 
-    private String[][] makeTrainingDataForBagging(int dataSize) {
+    private String[][] makeTrainingDataForBagging(double dataSize) {
 
         Random random = new Random();
+        int trainingDataSize = (int) ((double)trainingData.length * dataSize);
 
-        String[][] randomTrainingData = new String[dataSize][trainingData[0].length];
+        String[][] randomTrainingData = new String[trainingDataSize][trainingData[0].length];
 
         for (int i = 0; i < dataSize; i++) {
             randomTrainingData[i] = trainingData[random.nextInt(trainingData.length)];

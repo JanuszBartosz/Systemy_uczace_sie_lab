@@ -1,6 +1,7 @@
 package main.java.model;
 
 import main.java.data.Data;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -59,6 +60,33 @@ class NaiveBayes extends Model {
 
             String predicted = Collections.max(probability.entrySet(), Map.Entry.comparingByValue()).getKey();
             String real = testData[rowIdx][testData[0].length - 1];
+            confusionMatrix.get(predicted).compute(real, (k, v) -> v + 1.0d);
+        }
+
+        this.confusionTable = makeConfusionTable(confusionMatrix);
+    }
+
+    void run(List<MutablePair<String[], Double>> weightedTrainingData) {
+
+        Map<String, Map<String, Double>> confusionMatrix = makeEmptyConfusionMatrix(); //Predicted <Real, Count>
+
+        for (MutablePair<String[], Double> weightedObservation : weightedTrainingData) {
+            Map<String, Double> probability = makeEmptyClassMap(0.0d);
+            String[] observation = weightedObservation.getLeft();
+            for (int i = 0; i < observation.length - 1; i++) {
+                String attr = observation[i];
+                Map<String, Double> chance = chances.get(i).get(attr);
+
+                for (Map.Entry<String, Double> entry : chance.entrySet()) {
+                    probability.compute(entry.getKey(), (k, v) -> v + entry.getValue() * probAPriori.get(entry.getKey()));
+                }
+            }
+
+            String predicted = Collections.max(probability.entrySet(), Map.Entry.comparingByValue()).getKey();
+            String real = observation[observation.length - 1];
+            if(!predicted.equals(real)){
+                weightedObservation.setRight(weightedObservation.getRight() + 1.0);
+            }
             confusionMatrix.get(predicted).compute(real, (k, v) -> v + 1.0d);
         }
 

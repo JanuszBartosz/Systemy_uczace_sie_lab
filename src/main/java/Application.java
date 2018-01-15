@@ -34,15 +34,17 @@ public class Application {
             Params.numberBins = 10;
             Params.type = DiscretizatorType.FREQUENCY;
             data = new DataReader(filename).readData();
-            allScores.add(models.runNaiveBayesBoostingEnsemble(data, 0, 10));
+
+            for (double trainingDataSize = 0.1; trainingDataSize <= 1.0; trainingDataSize += 0.1)
+                allScores.add(models.runNaiveBayesBoostingEnsemble(data, trainingDataSize, 10));
 
             List<String> lines = new ArrayList<>();
 
             for (Map<String, Double> score : allScores) {
                 lines.add(score.values().stream().map(Object::toString).collect(Collectors.joining(",")));
             }
-            Files.deleteIfExists(Paths.get("scores", filename + "_score.txt"));
-            Files.write(Paths.get("scores", filename + "_score.txt"), lines);
+            Files.deleteIfExists(Paths.get("scores", "boosting", filename, "trainingDataSize_.txt"));
+            Files.write(Paths.get("scores", "boosting", filename, "trainingDataSize_.txt"), lines);
         }
     }
 }
