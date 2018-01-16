@@ -16,7 +16,6 @@ public class NaiveBayesBaggingEnsemble extends Model {
     NaiveBayesBaggingEnsemble(Data data, int foldNumber, double trainingDataSize, int classifiersNumber) {
         super(data, foldNumber);
 
-        trainingDataSize = trainingDataSize == 0 ? trainingData.length : trainingDataSize;
         this.classifiers = new ArrayList<>(classifiersNumber);
 
         for (int i = 0; i < classifiersNumber; i++) {
@@ -58,7 +57,7 @@ public class NaiveBayesBaggingEnsemble extends Model {
 
         String[][] randomTrainingData = new String[trainingDataSize][trainingData[0].length];
 
-        for (int i = 0; i < dataSize; i++) {
+        for (int i = 0; i < trainingDataSize; i++) {
             randomTrainingData[i] = trainingData[random.nextInt(trainingData.length)];
         }
         return randomTrainingData;

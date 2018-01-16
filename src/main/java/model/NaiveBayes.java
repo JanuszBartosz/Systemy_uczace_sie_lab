@@ -84,9 +84,6 @@ class NaiveBayes extends Model {
 
             String predicted = Collections.max(probability.entrySet(), Map.Entry.comparingByValue()).getKey();
             String real = observation[observation.length - 1];
-            if(!predicted.equals(real)){
-                weightedObservation.setRight(weightedObservation.getRight() + 1.0);
-            }
             confusionMatrix.get(predicted).compute(real, (k, v) -> v + 1.0d);
         }
 

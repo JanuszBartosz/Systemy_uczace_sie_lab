@@ -17,7 +17,7 @@ public class NaiveBayesBoostingEnsemble extends Model {
     NaiveBayesBoostingEnsemble(Data data, int foldNumber, double trainingDataSize, int classifiersNumber) {
         super(data, foldNumber);
 
-        double initialWeight = 1.0;
+        double initialWeight = 1.0 / trainingData.length;
         this.weightedTrainingData = Arrays.stream(trainingData)
                 .map(s -> new MutablePair<>(s, initialWeight))
                 .collect(Collectors.toList());
@@ -40,29 +40,27 @@ public class NaiveBayesBoostingEnsemble extends Model {
 
             NaiveBayes classifier = new NaiveBayes(data, trainingDataArray, this.testData);
 
+            // Scoring classifier.
             classifier.run(weightedTrainingData);
-            classifierScores.add(classifier.doScoring());
+            Map<String, Double> score = classifier.doScoring();
+            Double averageScore = score.values().stream()
+                    .filter(v -> !Double.isNaN(v))
+                    .collect(Collectors.averagingDouble(v -> v));
 
-            tmpClassifiers.add(classifier);
-        }
-
-        Set<String> NaNMeasure = new HashSet<>();
-        for (Map<String, Double> classifierScore : classifierScores) {
-            for (Map.Entry<String, Double> entry : classifierScore.entrySet()) {
-                if (Double.isNaN(entry.getValue()))
-                    NaNMeasure.add(entry.getKey());
+            // Updating training data weights.
+            double error = 1.0 - averageScore;
+            double classifierWeight = Math.log((1.0 - error) / error);
+            for (MutablePair<String[], Double> observation : weightedTrainingData) {
+                String predicted = classifier.predict(observation.getLeft());
+                String real = observation.getLeft()[observation.getLeft().length - 1];
+                if (!predicted.equals(real)) {
+                    observation.setRight(observation.getRight() * Math.exp(classifierWeight));
+                }
             }
+            classifiers.add(new ImmutablePair<>(classifier, classifierWeight));
         }
 
-        for (int i = 0; i < classifierScores.size(); i++) {
-            Map<String, Double> classifierScore = classifierScores.get(i);
-            Double weight = classifierScore.entrySet().stream()
-                    .filter(e -> !NaNMeasure.contains(e.getKey()))
-                    .collect(Collectors.averagingDouble(Map.Entry::getValue));
-            classifiers.add(new ImmutablePair<>(tmpClassifiers.get(i), weight));
-        }
     }
-
 
     void run() {
 
@@ -92,7 +90,7 @@ public class NaiveBayesBoostingEnsemble extends Model {
     private List<MutablePair<String[], Double>> makeTrainingDataForBoosting(double dataSize) {
 
         Random random = new Random();
-        int trainingDataSize = (int) ((double)trainingData.length * dataSize);
+        int trainingDataSize = (int) ((double) trainingData.length * dataSize);
         List<MutablePair<String[], Double>> randomTrainingData = new ArrayList<>(trainingDataSize);
 
         int rouletteSize = 10000;

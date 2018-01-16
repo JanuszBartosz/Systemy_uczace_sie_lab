@@ -45,7 +45,7 @@ public class Models {
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.averagingDouble(Map.Entry::getValue)));
     }
 
-    public Map<String, Double> runNaiveBayesBaggingEnsemble(Data data, int trainingDataSize, int classifiersNumber) {
+    public Map<String, Double> runNaiveBayesBaggingEnsemble(Data data, double trainingDataSize, int classifiersNumber) {
         List<Map<String, Double>> scores = new ArrayList<>();
         for (int foldNumber = 0; foldNumber < Params.numberFolds; foldNumber++) {
             scores.add(new NaiveBayesBaggingEnsemble(data, foldNumber, trainingDataSize, classifiersNumber).doScoring());
